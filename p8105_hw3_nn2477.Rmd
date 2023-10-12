@@ -45,3 +45,18 @@ ggplot(aes(x = reorder(aisle, -total_items), y = total_items)) +
   theme_minimal()
 ```
 
+## making a table for the three most popular items 
+
+```{r}
+instacart %>% 
+  filter(aisle %in% c("baking ingredients", "dog food care", "packaged vegetables fruits")) %>% 
+  group_by(aisle, product_name) %>% 
+  summarise(order_count = n()) %>% 
+  arrange(aisle, desc(order_count)) %>% 
+  group_by(aisle) %>% 
+  slice_max(order_count, n = 3) %>% 
+  pivot_wider(
+    names_from = aisle,
+    values_from = order_count)
+```
+
