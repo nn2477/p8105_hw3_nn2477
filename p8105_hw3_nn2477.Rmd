@@ -1,0 +1,47 @@
+---
+title: "hw3_nn2477"
+author: "Nhu Nguyen"
+date: "2023-10-11"
+output: github_document
+---
+## loading necessary libraries 
+```{r}
+library(tidyverse)
+library(ggplot2)
+library(p8105.datasets)
+data("instacart")
+```
+
+## getting the number of unique aisles
+```{r}
+instacart %>% 
+  summarise(count = n_distinct(aisle))
+```
+
+## getting the aisles with the most item ordered
+```{r}
+instacart %>% 
+  group_by(aisle) %>% 
+  summarise(total_items = n()) %>% 
+  arrange(desc(total_items))
+```
+
+## making plot for aisle and number of items ordered 
+
+```{r}
+instacart %>% 
+  group_by(aisle) %>% 
+  summarise(total_items = n()) %>% 
+  filter(total_items > 10000) %>% 
+  arrange(desc(total_items)) %>% 
+ggplot(aes(x = reorder(aisle, -total_items), y = total_items)) +
+  geom_bar(stat = "identity", fill = "skyblue") + 
+  labs (
+    title = "number of items ordered in each aisle", 
+    x = "aisle",
+    y = "total items ordered"
+  ) + 
+  coord_flip() + 
+  theme_minimal()
+```
+
