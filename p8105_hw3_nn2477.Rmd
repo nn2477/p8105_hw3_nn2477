@@ -60,3 +60,22 @@ instacart %>%
     values_from = order_count)
 ```
 
+## create table for pink landy apples and coffee ice cream 
+```{r}
+instacart %>% 
+  mutate(order_dow = recode(
+    order_dow,
+    "0" = "sunday",
+    "1" = "monday",
+    "2" = "tuesday",
+    "3" = "wednesday",
+    "4" = "thursday",
+    "5" = "friday",
+    "6" = "saturday"), 
+    order_hour_of_day = ifelse(
+      order_hour_of_day <= 12, 
+      paste0(order_hour_of_day, "AM"),
+      paste0(order_hour_of_day - 12, "PM")))
+    
+```
+
