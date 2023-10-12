@@ -4,6 +4,7 @@ author: "Nhu Nguyen"
 date: "2023-10-11"
 output: github_document
 ---
+## problem 1
 ## loading necessary libraries 
 ```{r}
 library(tidyverse)
@@ -71,11 +72,48 @@ instacart %>%
     "3" = "wednesday",
     "4" = "thursday",
     "5" = "friday",
-    "6" = "saturday"), 
-    order_hour_of_day = ifelse(
-      order_hour_of_day <= 12, 
-      paste0(order_hour_of_day, "AM"),
-      paste0(order_hour_of_day - 12, "PM")))
-    
+    "6" = "saturday")) %>% 
+  filter(product_name %in% c("Pink Lady Apples", "Coffee Ice Cream")) %>% 
+  group_by(order_dow, product_name) %>% 
+  summarise(mean_hour = mean(order_hour_of_day, na.rm = TRUE)) 
+```
+
+## problem 2 
+loading dataset 
+```{r}
+data("brfss_smart2010")
+```
+
+## cleaning dataset 
+
+```{r}
+brfss_smart2010 %>% 
+  janitor::clean_names() %>% 
+  separate(locationdesc, into = c("state", "county")) %>% 
+  filter(topic == "Overall Health",
+     response %in% c("Excellent", "Very good", "Good", "Fair", "Poor")) %>% 
+  mutate(response = factor(
+    response,
+    levels = c("Poor", "Fair", "Good", "Very good", "Excellent"), exclude = NULL)) %>% 
+  rename("general health" = response) %>% 
+  select(-locationabbr, -class, -question, -data_value_type, -data_value_footnote_symbol, -data_value_footnote, -data_source, -class_id, -topic_id, -location_id, -question_id) %>% 
+  pivot_longer()
+
+
+```
+
+
+```{r}
+janitor::clean_names() %>% 
+  separate(locationdesc, into = c("state", "county")) %>% 
+  select(-locationabbr, -question, -class, -question_id, -class_id, -topic_id, -data_value_type, -location_id, -data_value_footnote, -data_value_footnote_symbol) %>% 
+  filter(topic == "overall health", 
+         response %in% c("Excellent", "Very good", "Good", "Fair", "Poor")) %>% 
+  mutate(response = factor(
+    response, 
+     levels = c("Poor", "Fair", "Good", "Very good", "Excellent"), exclude = NULL)) %>% 
+  rename("General Health" = response)
+
+ 
 ```
 
