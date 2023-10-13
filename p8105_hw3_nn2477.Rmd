@@ -32,7 +32,6 @@ scale_fill_discrete = scale_fill_viridis_d
 ```
 
 
-
 ```{r}
 library(tidyverse)
 library(ggplot2)
@@ -151,18 +150,42 @@ In 2010,`r with(brfss_2010, paste(unique(state), collapse = ", "))` were observe
 ```{r}
 brfss_excellent <- brfss_df %>% 
   filter(response == "Excellent") %>% 
-  group_by(state) %>% 
-  mutate(avg_data_value = mean(data_value)) %>%
-  select(year, state, avg_data_value) 
+  group_by(year, state) %>% 
+  summarise (mean_data_value = mean(data_value))
 
-
-  ggplot(brfss_excellent, aes(x = year, y = avg_data_value, group = state, color = state)) +
-  geom_line() +
+  ggplot(brfss_excellent, aes(x = year, y = mean_data_value, group = state, color = state)) +
+  geom_line(alpha = .5) +
   labs(
     title = "average value over time by state",
     x = "year",
-    y = "average value"
+    y = "average data value (%)"
   ) + 
     theme_minimal()
 ```
+
+## making two panel plot for NYC data
+
+```{r}
+brfss_ny_df = brfss_df %>% 
+  filter(year %in% c("2006", "2010"),
+         state == "NY",
+         response %in% c("Poor", "Fair", "Good", "Very good", "Excellent")) 
+
+brfss_ny_df %>% 
+  ggplot(aes(x = response, y = data_value)) + 
+  geom_boxplot() +
+  geom_point(aes(color = county)) +
+  facet_grid(. ~ year) +
+  labs(
+    title = "distribution of data value by response in NY state counties in 2006 and 2010",
+    x = "response", 
+    y = "data_value (%)",
+    color = "county"
+  ) + 
+  theme_minimal()
+```
+
+
+## problem 3 
+
 
