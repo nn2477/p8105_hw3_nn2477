@@ -147,7 +147,22 @@ brfss_2010 <- brfss_df %>%
 ```
 In 2010,`r with(brfss_2010, paste(unique(state), collapse = ", "))` were observed to have 7 or more locations. 
 
-```{r}
 
+```{r}
+brfss_excellent <- brfss_df %>% 
+  filter(response == "Excellent") %>% 
+  group_by(state) %>% 
+  mutate(avg_data_value = mean(data_value)) %>%
+  select(year, state, avg_data_value) 
+
+
+  ggplot(brfss_excellent, aes(x = year, y = avg_data_value, group = state, color = state)) +
+  geom_line() +
+  labs(
+    title = "average value over time by state",
+    x = "year",
+    y = "average value"
+  ) + 
+    theme_minimal()
 ```
 
