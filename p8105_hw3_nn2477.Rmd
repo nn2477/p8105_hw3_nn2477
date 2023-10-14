@@ -31,16 +31,9 @@ scale_colour_discrete = scale_colour_viridis_d
 scale_fill_discrete = scale_fill_viridis_d
 ```
 
-
-```{r}
-library(tidyverse)
-library(ggplot2)
-library(p8105.datasets)
-data("instacart")
-```
-
 ## getting the number of unique aisles
 ```{r}
+data("instacart")
 instacart %>% 
   summarise(count = n_distinct(aisle))
 ```
@@ -187,5 +180,48 @@ brfss_ny_df %>%
 
 
 ## problem 3 
+
+cleaning, tidying, merging datasets 
+```{r}
+accel_df =
+  read.csv("./data/nhanes_accel.csv") %>% 
+  janitor::clean_names() 
+
+covar_df = 
+  read_csv("./data/nhanes_covar.csv", skip = 4) %>%
+  janitor::clean_names() %>% 
+  filter(age >= 21) %>% 
+  mutate(sex = recode(
+    sex, `1` = "male", `2` = "female"),
+    education = recode(
+      education, `1` = "less than high school", `2` = "high school equivalent", `3` = "more than high school"
+    ),
+    sex = factor(sex), 
+    education = factor(education)) %>% 
+  drop_na()
+
+mims_df = inner_join(covar_df, accel_df, by = "seqn")
+
+```
+men/women by education and age distribution
+```{r}
+education_mims_df <- mims_df %>% 
+  group_by (sex, education) %>% 
+  summarise(count = n()) %>% 
+  pivot_wider(
+    names_from = sex,
+    values_from = count) 
+
+ggplot(mims_df, aes(x = sex, y = age)) + 
+  geom_boxplot() + 
+  geom_point(aes(color = sex)) +
+  facet_wrap(.~ education) +
+  labs(
+    title = "age distribution by education and gender",
+    x = "gender",
+    y = "age"
+  ) + theme_minimal()
+```
+
 
 
