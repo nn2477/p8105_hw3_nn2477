@@ -30,8 +30,7 @@ options(
 scale_colour_discrete = scale_colour_viridis_d
 scale_fill_discrete = scale_fill_viridis_d
 ```
-
-## getting the number of unique aisles
+## problem 1
 ```{r}
 data("instacart")
 instacart %>% 
@@ -139,14 +138,16 @@ brfss_2010 <- brfss_df %>%
 ```
 In 2010,`r with(brfss_2010, paste(unique(state), collapse = ", "))` were observed to have 7 or more locations. 
 
-
 ```{r}
 brfss_excellent <- brfss_df %>% 
   filter(response == "Excellent") %>% 
   group_by(year, state) %>% 
   summarise (mean_data_value = mean(data_value))
+```
+This data set has `r nrow(brfss_excellent)` observations that responded "Excellent" when asked about their general health
 
-  ggplot(brfss_excellent, aes(x = year, y = mean_data_value, group = state, color = state)) +
+```{r}
+ggplot(brfss_excellent, aes(x = year, y = mean_data_value, group = state, color = state)) +
   geom_line(alpha = .5) +
   labs(
     title = "average value over time by state",
@@ -155,6 +156,8 @@ brfss_excellent <- brfss_df %>%
   ) + 
     theme_minimal()
 ```
+
+this "spaghetti" plot shows a general trend of data value points decreasing over time for each state. the average data value ranges from 17.5 to 27.5 capturing most points, however some average data values do fall outside this range. specifically, WV appears to be a visual outlier in this plot. 
 
 ## making two panel plot for NYC data
 
@@ -178,6 +181,7 @@ brfss_ny_df %>%
   theme_minimal()
 ```
 
+For both 2006 and 2010, the response "good" and "very good" has the highest data values while the response "poor" had the lowest data value. 
 
 ## problem 3 
 
@@ -200,7 +204,7 @@ covar_df =
     education = factor(education)) %>% 
   drop_na()
 
-mims_df = inner_join(covar_df, accel_df, by = "seqn")
+mims_df = left_join(covar_df, accel_df, by = "seqn")
 
 ```
 men/women by education and age distribution
@@ -210,18 +214,64 @@ education_mims_df <- mims_df %>%
   summarise(count = n()) %>% 
   pivot_wider(
     names_from = sex,
-    values_from = count) 
+    values_from = count)
+knitr::kable(education_mims_df, caption = "# of men and women in each education category")
+```
 
-ggplot(mims_df, aes(x = sex, y = age)) + 
-  geom_boxplot() + 
-  geom_point(aes(color = sex)) +
-  facet_wrap(.~ education) +
+the highest education both genders received was in the "more than high school" category.
+
+```{r}
+ggplot(mims_df, aes(x = education, y = age, fill = sex)) + 
+  geom_boxplot(alpha = .5) + 
   labs(
     title = "age distribution by education and gender",
-    x = "gender",
+    x = "education category",
     y = "age"
   ) + theme_minimal()
 ```
 
+females, on average, appeared to be older in the "high school equivalent" category, whereas males, on average, appeared to be older in the "less than high school" and "more than high school" education category. 
+
+## total activity over day plot 
+
+aggregating min variable
+```{r}
+total_activity_df <- mims_df %>% 
+  mutate(
+    total_activity = rowSums(across(c(min1:min1440)))
+  )
+```
+
+creating plots:
+```{r}
+ggplot(total_activity_df, aes(x = age, y = total_activity, color = sex)) +
+  geom_point(alpha = .5) + 
+  facet_wrap(~education, ncol = 1) + 
+  geom_smooth(se = FALSE)+
+  labs(
+    title = "total activity vs age by education level", 
+    x = "age",
+    y = "total activity"
+  ) + 
+  theme_minimal()
+  
+```
+
+in all 3 education categories, on average, the total physical activity for both genders tend to decrease with overall age. for both "high school equivalent" and "more than high school" education category, women tend to be more active compared to their male counterparts (as seen in the trend lines). the greatest decline in trend line for both genders is in the "less than high school" education category.
+
+## activity over day plot
+```{r}
+time_course_data <- total_activity_df %>% 
+  group_by(education, sex) %>% 
+  summarise(across(starts_with("min"), ~mean(.), .names = "mean_{.col}")) %>% 
+  pivot_longer(
+    cols = starts_with("mean"),
+    names_to = "time",
+    values_to = "mean") %>% 
+  mutate(time = substring(time, 9),
+         time = as.numeric(time))
+
+ggplot(time_course_data, aes(x = time, y = ))
+```
 
 
