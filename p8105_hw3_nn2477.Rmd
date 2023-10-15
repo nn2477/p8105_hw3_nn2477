@@ -271,7 +271,15 @@ time_course_data <- total_activity_df %>%
   mutate(time = substring(time, 9),
          time = as.numeric(time))
 
-ggplot(time_course_data, aes(x = time, y = ))
+ggplot(time_course_data, aes(x = time, y = mean, color = sex)) + 
+  geom_point(alpha = .25, mean = .1) + 
+  facet_wrap(. ~ education, ncol = 1) + 
+  labs(
+    title = "24-hour activity time course by gender and education level",
+    x = "time (min)",
+    y = "mean activity level"
+  ) +
+  theme_minimal()
 ```
 
-
+for all three education categories in both genders, the mean physical activity level dips before it sharply increased (around morning). Similarly, the mean physical activity level decreased after midday in all 3 categories for both male and female. the "less than high school" education category appears to have the highest mean physical activity levels. 
